@@ -96,19 +96,10 @@ export default function Header({ onSearch }: HeaderProps) {
                   className="w-full h-11 pl-11 pr-4 border border-slate-300 bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#1c6554] focus:ring-2 focus:ring-[#1c6554]/20 transition-all"
                   aria-label="Buscar productos"
                 />
+                {/* Icono de búsqueda (lupa) */}
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                   <SearchIcon />
                 </div>
-                {searchInput && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchInput('')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
-                    aria-label="Limpiar búsqueda"
-                  >
-                    <CloseIcon />
-                  </button>
-                )}
               </div>
             </div>
 

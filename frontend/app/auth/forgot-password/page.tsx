@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <>
+    <div className="animate-page-enter">
       {/* Logo fijo superior derecho */}
       <div className="fixed top-4 right-4 z-[9999] transition-all hover:scale-110 pointer-events-auto" style={{
         filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4)) drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
@@ -97,7 +97,6 @@ export default function ForgotPasswordPage() {
                 value={email}
                 onChange={setEmail}
                 icon={<EmailIcon />}
-                placeholder="tu@email.com"
               />
 
               <button
@@ -130,7 +129,7 @@ export default function ForgotPasswordPage() {
           )}
         </form>
       </article>
-    </>
+    </div>
   );
 }
 

@@ -36,7 +36,7 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
 
   // Desactivar la animación inicial después del primer render
   useEffect(() => {
-    const timer = setTimeout(() => setIsInitialMount(false), 100);
+    const timer = setTimeout(() => setIsInitialMount(false), 600);
     return () => clearTimeout(timer);
   }, []);
 
@@ -111,7 +111,7 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
           } ${loginFormClass} ${
             isSignUp ? 'hidden lg:grid' : 'grid'
           }`}
-          style={isInitialMount ? { animation: 'fadeIn 0.5s ease-out forwards' } : undefined}
+          style={isInitialMount ? { animation: 'fadeIn 0.6s ease-out 0.2s forwards' } : undefined}
         >
           <AuthFormHeader title="Iniciar sesión" />
 
@@ -162,7 +162,7 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
           className={`hidden lg:flex flex-col justify-center items-end gap-4 relative z-10 row-start-1 col-start-2 px-12 lg:px-20 xl:px-24 ${
             isInitialMount ? 'opacity-0' : ''
           } ${loginTextClass}`}
-          style={isInitialMount ? { animation: 'fadeIn 0.5s ease-out 0.2s forwards' } : undefined}
+          style={isInitialMount ? { animation: 'fadeIn 0.6s ease-out 0.35s forwards' } : undefined}
         >
           <h3 className="text-4xl xl:text-5xl uppercase font-black text-slate-900 max-w-[320px] text-right leading-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)]">
             ¡Bienvenido!
@@ -177,7 +177,7 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
           className={`hidden lg:flex flex-col justify-center items-start gap-4 relative z-10 row-start-1 col-start-1 px-12 lg:px-20 xl:px-24 ${
             isInitialMount ? 'opacity-0' : ''
           } ${registerTextClass}`}
-          style={isInitialMount ? { animation: 'fadeIn 0.5s ease-out 0.2s forwards' } : undefined}
+          style={isInitialMount ? { animation: 'fadeIn 0.6s ease-out 0.35s forwards' } : undefined}
         >
           <h3 className="text-4xl xl:text-5xl uppercase font-black text-slate-900 max-w-[320px] text-left leading-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)]">
             ¡Únete!
@@ -195,7 +195,7 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
           } ${registerFormClass} ${
             isSignUp ? 'grid' : 'hidden lg:grid'
           }`}
-          style={isInitialMount ? { animation: 'fadeIn 0.5s ease-out forwards' } : undefined}
+          style={isInitialMount ? { animation: 'fadeIn 0.6s ease-out 0.2s forwards' } : undefined}
         >
           <AuthFormHeader title="Crear cuenta" />
 
