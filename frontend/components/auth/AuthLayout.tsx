@@ -25,7 +25,7 @@ const BRANDING: Record<
       'Descuentos exclusivos para miembros',
       'Historial de compras y listas de favoritos',
     ],
-    gradient: 'from-[#0C447C] via-[#0C447C] to-[#2E7D32]',
+    gradient: 'from-[#0C447C] via-[#0C447C] to-[#1c6554]',
   },
   register: {
     title: 'Únete a nuestra comunidad',
@@ -37,7 +37,7 @@ const BRANDING: Record<
       'Programa de puntos y recompensas',
       'Soporte prioritario 24/7',
     ],
-    gradient: 'from-[#2E7D32] via-[#2E7D32] to-[#0C447C]',
+    gradient: 'from-[#1c6554] via-[#1c6554] to-[#0C447C]',
   },
   'forgot-password': {
     title: 'Recupera tu acceso',
@@ -48,7 +48,7 @@ const BRANDING: Record<
       'Enlace válido por 24 horas',
       'Soporte disponible si necesitas ayuda',
     ],
-    gradient: 'from-[#0C447C] via-[#0C447C] to-[#2E7D32]',
+    gradient: 'from-[#0C447C] via-[#0C447C] to-[#1c6554]',
   },
 };
 
@@ -78,7 +78,7 @@ export default function AuthLayout({ children, type }: AuthLayoutProps) {
               {footerLink.text}{' '}
               <Link
                 href={footerLink.href}
-                className="text-[#2E7D32] hover:text-[#2E7D32]/80 font-semibold"
+                className="text-[#1c6554] hover:text-[#1c6554]/80 font-semibold"
               >
                 {footerLink.label}
               </Link>

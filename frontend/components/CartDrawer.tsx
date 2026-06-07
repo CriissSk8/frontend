@@ -1,11 +1,32 @@
+/**
+ * Cart Drawer Component - New Era Supermercado
+ * 
+ * Drawer lateral del carrito de compras con:
+ * - Lista de items en el carrito
+ * - Controles de cantidad
+ * - Cálculo de subtotal, envío y total
+ * - Indicador de envío gratis
+ * - Botones de checkout y vaciar carrito
+ * 
+ * @module components/CartDrawer
+ */
+
 'use client';
 
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
-import { FREE_SHIPPING_THRESHOLD, getCategoryEmoji } from '@/lib/constants';
+import CategoryIcon from '@/components/CategoryIcon';
+import { FREE_SHIPPING_THRESHOLD } from '@/lib/constants';
 import { formatPrice, getOrderTotal, getShippingCost } from '@/lib/format';
 
+/**
+ * Componente de drawer lateral del carrito.
+ * 
+ * Se abre/cierra desde el Header al hacer clic en el botón del carrito.
+ * 
+ * @returns {JSX.Element}
+ */
 export default function CartDrawer() {
   const { items, updateQuantity, removeItem, clearCart, totalPrice, isOpen, setIsOpen } =
     useCart();
@@ -13,6 +34,7 @@ export default function CartDrawer() {
   const shippingCost = getShippingCost(totalPrice);
   const orderTotal = getOrderTotal(totalPrice);
 
+  // Bloquear scroll del body cuando el drawer está abierto
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => {
@@ -37,22 +59,22 @@ export default function CartDrawer() {
         aria-label="Carrito de compras"
         aria-hidden={!isOpen}
       >
-        <header className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+        <header className="flex items-center justify-between px-6 py-5 border-b border-slate-200 dark:border-slate-800 bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#2E7D32]/10 dark:bg-[#2E7D32]/20 flex items-center justify-center">
+            <div className="w-12 h-12 bg-[#1c6554]/10 dark:bg-[#1c6554]/20 flex items-center justify-center shadow-sm">
               <CartIcon />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Carrito</h2>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Mi Carrito</h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                {items.length} {items.length === 1 ? 'producto' : 'productos'}
+                {items.length} {items.length === 1 ? 'artículo' : 'artículos'}
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="w-9 h-9 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors"
+            className="w-10 h-10 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-all duration-200 hover:scale-110"
             aria-label="Cerrar carrito"
           >
             <CloseIcon />
@@ -63,24 +85,22 @@ export default function CartDrawer() {
           {items.length === 0 ? (
             <EmptyCart />
           ) : (
-            <ul className="space-y-3">
+            <ul className="space-y-4">
               {items.map((item, index) => (
                 <li
                   key={item.product.id}
-                  className="flex gap-4 p-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 animate-slide-up"
+                  className="flex gap-4 p-4 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-[#1c6554]/30 dark:hover:border-[#1c6554]/30 transition-all duration-200 shadow-sm hover:shadow-md animate-slide-up"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="w-20 h-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center flex-shrink-0">
-                    <span className="text-3xl" aria-hidden="true">
-                      {getCategoryEmoji(item.product.categoryId)}
-                    </span>
+                  <div className="w-20 h-20 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <CategoryIcon name={item.product.category?.name || 'Todos los productos'} className="w-12 h-12" />
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-semibold text-slate-900 dark:text-white line-clamp-2 leading-snug">
                       {item.product.name}
                     </h3>
-                    <p className="text-sm font-bold text-[#2E7D32] dark:text-green-400 mt-1">
+                    <p className="text-sm font-bold text-[#1c6554] dark:text-green-400 mt-1">
                       {formatPrice(item.product.price)}
                     </p>
 
@@ -124,13 +144,13 @@ export default function CartDrawer() {
         </div>
 
         {items.length > 0 && (
-          <footer className="border-t border-slate-200 dark:border-slate-800 px-6 py-6 space-y-4 bg-slate-50 dark:bg-slate-900/50">
-            <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+          <footer className="border-t border-slate-200 dark:border-slate-800 px-6 py-6 space-y-4 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 shadow-2xl">
+            <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 shadow-sm">
               <CheckIcon />
-              <p className="text-xs text-green-700 dark:text-green-300">
+              <p className="text-sm text-green-700 dark:text-green-300 font-medium">
                 {shippingCost === 0
-                  ? '¡Tienes envío gratis!'
-                  : `Envío gratis desde ${formatPrice(FREE_SHIPPING_THRESHOLD)}`}
+                  ? '🎉 ¡Envío gratis incluido!'
+                  : `Agrega ${formatPrice(FREE_SHIPPING_THRESHOLD - totalPrice)} para envío gratis`}
               </p>
             </div>
 
@@ -149,7 +169,7 @@ export default function CartDrawer() {
               </div>
               <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
                 <span className="text-base font-semibold text-slate-900 dark:text-white">Total</span>
-                <span className="text-xl font-bold text-[#2E7D32] dark:text-green-400">
+                <span className="text-xl font-bold text-[#1c6554] dark:text-green-400">
                   {formatPrice(orderTotal)}
                 </span>
               </div>
@@ -158,14 +178,14 @@ export default function CartDrawer() {
             <Link
               href="/checkout"
               onClick={() => setIsOpen(false)}
-              className="block w-full py-3.5 bg-[#2E7D32] hover:bg-[#2E7D32]/90 text-white font-semibold text-center transition-all hover-lift"
+              className="block w-full py-4 bg-[#1c6554] hover:bg-[#1c6554]/90 text-white font-bold text-center transition-all hover:scale-[1.02] shadow-lg hover:shadow-xl text-base"
             >
               Proceder al pago
             </Link>
             <button
               type="button"
               onClick={clearCart}
-              className="w-full py-2.5 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium text-sm transition-colors"
+              className="w-full py-3 border-2 border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-600 font-semibold text-sm transition-all"
             >
               Vaciar carrito
             </button>
@@ -176,6 +196,13 @@ export default function CartDrawer() {
   );
 }
 
+/**
+ * Estado vacío del carrito.
+ * 
+ * Se muestra cuando no hay items en el carrito.
+ * 
+ * @returns {JSX.Element}
+ */
 function EmptyCart() {
   return (
     <div className="flex flex-col items-center justify-center h-full text-center animate-fade-in">
@@ -194,14 +221,22 @@ function EmptyCart() {
   );
 }
 
+/**
+ * Icono de carrito de compras.
+ * @returns {JSX.Element}
+ */
 function CartIcon() {
   return (
-    <svg className="w-5 h-5 text-[#2E7D32]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+    <svg className="w-5 h-5 text-[#1c6554]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
     </svg>
   );
 }
 
+/**
+ * Icono de cerrar/X.
+ * @returns {JSX.Element}
+ */
 function CloseIcon() {
   return (
     <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
@@ -210,6 +245,10 @@ function CloseIcon() {
   );
 }
 
+/**
+ * Icono de papelera/eliminar.
+ * @returns {JSX.Element}
+ */
 function TrashIcon() {
   return (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
@@ -218,6 +257,10 @@ function TrashIcon() {
   );
 }
 
+/**
+ * Icono de check/verificación.
+ * @returns {JSX.Element}
+ */
 function CheckIcon() {
   return (
     <svg className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">

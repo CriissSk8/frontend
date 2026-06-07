@@ -1,5 +1,22 @@
+/**
+ * Mock Catalog Data - New Era Supermercado
+ * 
+ * Datos mock de categorías y productos para desarrollo.
+ * 
+ * IMPORTANTE: Este archivo contiene datos de prueba.
+ * Una vez conectado con el backend real, estos datos no se usarán.
+ * Ver lib/api.ts para descomentar la integración real.
+ * 
+ * @module lib/data/catalog
+ */
+
 import type { Category, Product } from '@/lib/types';
 
+/**
+ * Lista de categorías mock para desarrollo.
+ * 
+ * Total: 8 categorías que cubren todo el espectro de un supermercado.
+ */
 export const MOCK_CATEGORIES: Category[] = [
   { id: 'cat-1', name: 'Frutas y Verduras' },
   { id: 'cat-2', name: 'Lácteos y Huevos' },
@@ -11,6 +28,12 @@ export const MOCK_CATEGORIES: Category[] = [
   { id: 'cat-8', name: 'Limpieza y Hogar' },
 ];
 
+/**
+ * Lista de productos mock para desarrollo.
+ * 
+ * Total: 16 productos distribuidos entre las 8 categorías.
+ * Cada producto incluye datos realistas de precios colombianos (COP).
+ */
 export const MOCK_PRODUCTS: Product[] = [
   {
     id: 'prod-1',

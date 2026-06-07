@@ -27,7 +27,7 @@ export default function AuthField({
   required = true,
 }: AuthFieldProps) {
   return (
-    <fieldset className="relative border-b-2 border-slate-400 dark:border-slate-600 focus-within:border-[#2E7D32] pb-3 flex items-center gap-3 transition-colors mb-2">
+    <fieldset className="relative border-b-2 border-slate-400 dark:border-slate-600 focus-within:border-[#1c6554] pb-3 flex items-center gap-3 transition-colors mb-2">
       <input
         id={id}
         type={type}
@@ -40,7 +40,7 @@ export default function AuthField({
       />
       <label
         htmlFor={id}
-        className="absolute left-0 peer-placeholder-shown:top-1 peer-placeholder-shown:text-base peer-placeholder-shown:text-slate-600 peer-focus:-top-6 peer-focus:text-[#2E7D32] peer-focus:text-sm peer-focus:font-semibold -top-6 text-sm font-semibold text-slate-800 dark:text-slate-200 transition-all pointer-events-none"
+        className="absolute left-0 peer-placeholder-shown:top-1 peer-placeholder-shown:text-base peer-placeholder-shown:text-slate-600 peer-focus:-top-6 peer-focus:text-[#1c6554] peer-focus:text-sm peer-focus:font-semibold -top-6 text-sm font-semibold text-slate-800 dark:text-slate-200 transition-all pointer-events-none"
       >
         {label}
       </label>

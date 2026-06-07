@@ -1,13 +1,38 @@
+/**
+ * Product Card Component - New Era Supermercado
+ * 
+ * Tarjeta de producto individual con:
+ * - Información del producto (nombre, precio, stock)
+ * - Indicadores de stock bajo
+ * - Controles para agregar al carrito
+ * - Controles de cantidad si ya está en el carrito
+ * 
+ * @module components/ProductCard
+ */
+
 'use client';
 
 import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/lib/format';
 import type { Product } from '@/lib/types';
 
+/**
+ * Props del componente ProductCard.
+ */
 interface ProductCardProps {
+  /** Producto a mostrar */
   product: Product;
 }
 
+/**
+ * Tarjeta de producto para el grid del catálogo.
+ * 
+ * Muestra información del producto y permite agregarlo al carrito.
+ * Si el producto ya está en el carrito, muestra controles de cantidad.
+ * 
+ * @param {ProductCardProps} props
+ * @returns {JSX.Element}
+ */
 export default function ProductCard({ product }: ProductCardProps) {
   const { items, addItem, updateQuantity } = useCart();
   const cartItem = items.find((item) => item.product.id === product.id);
@@ -59,7 +84,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
 
         <div className="mt-3">
-          <p className="text-xl font-bold text-[#2E7D32]">
+          <p className="text-xl font-bold text-[#1c6554]">
             {formatPrice(product.price)}
           </p>
           {product.stock > 10 && (
@@ -87,7 +112,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             <button
               type="button"
               onClick={() => addItem(product)}
-              className="w-full py-2.5 bg-[#2E7D32] hover:bg-[#2E7D32]/90 text-white text-sm font-semibold transition-all hover-lift flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-[#1c6554] hover:bg-[#1c6554]/90 text-white text-sm font-semibold transition-all hover-lift flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
             >
               <PlusIcon />
               Agregar
@@ -99,13 +124,29 @@ export default function ProductCard({ product }: ProductCardProps) {
   );
 }
 
+/**
+ * Props del componente QuantityControls.
+ */
 interface QuantityControlsProps {
+  /** Cantidad actual */
   quantity: number;
+  /** Cantidad máxima permitida (stock del producto) */
   maxQuantity: number;
+  /** Callback para disminuir cantidad */
   onDecrease: () => void;
+  /** Callback para aumentar cantidad */
   onIncrease: () => void;
 }
 
+/**
+ * Controles de cantidad para productos en el carrito.
+ * 
+ * Muestra botones - y + con la cantidad actual en el medio.
+ * El botón + se deshabilita al alcanzar el stock máximo.
+ * 
+ * @param {QuantityControlsProps} props
+ * @returns {JSX.Element}
+ */
 function QuantityControls({ quantity, maxQuantity, onDecrease, onIncrease }: QuantityControlsProps) {
   return (
     <div className="flex items-center gap-2">
@@ -122,7 +163,7 @@ function QuantityControls({ quantity, maxQuantity, onDecrease, onIncrease }: Qua
         type="button"
         onClick={onIncrease}
         disabled={quantity >= maxQuantity}
-        className="flex-1 py-2.5 bg-[#2E7D32] hover:bg-[#2E7D32]/90 text-white font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex-1 py-2.5 bg-[#1c6554] hover:bg-[#1c6554]/90 text-white font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         aria-label="Aumentar cantidad"
       >
         +
@@ -131,6 +172,10 @@ function QuantityControls({ quantity, maxQuantity, onDecrease, onIncrease }: Qua
   );
 }
 
+/**
+ * Icono de más/plus.
+ * @returns {JSX.Element}
+ */
 function PlusIcon() {
   return (
     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">

@@ -1,3 +1,16 @@
+/**
+ * Hero Banner Component - New Era Supermercado
+ * 
+ * Banner principal de la landing page con:
+ * - Carrusel automático de slides
+ * - Imágenes de fondo con overlay gradient
+ * - Indicadores de navegación
+ * - Estadísticas (productos, tiempo de entrega, calificación)
+ * - CTAs principales
+ * 
+ * @module components/Hero
+ */
+
 'use client';
 
 import Image from 'next/image';
@@ -6,13 +19,27 @@ import { FREE_SHIPPING_THRESHOLD } from '@/lib/constants';
 import { HERO_SLIDES } from '@/lib/data/hero-slides';
 import { formatPrice } from '@/lib/format';
 
+/** Intervalo entre slides automáticos (en milisegundos) */
 const SLIDE_INTERVAL_MS = 6000;
+
+/** Duración de la transición entre slides (en milisegundos) */
 const TRANSITION_MS = 500;
 
+/**
+ * Componente de banner hero con carrusel.
+ * 
+ * Muestra información destacada sobre el supermercado con cambio automático
+ * de slides cada 6 segundos.
+ * 
+ * @returns {JSX.Element}
+ */
 export default function Hero() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
+  /**
+   * Navega a un slide específico con animación.
+   */
   const goToSlide = useCallback(
     (index: number) => {
       if (isTransitioning || index === currentIndex) return;
@@ -23,10 +50,14 @@ export default function Hero() {
     [currentIndex, isTransitioning]
   );
 
+  /**
+   * Avanza al siguiente slide (con loop circular).
+   */
   const nextSlide = useCallback(() => {
     goToSlide((currentIndex + 1) % HERO_SLIDES.length);
   }, [currentIndex, goToSlide]);
 
+  // Configurar avance automático de slides
   useEffect(() => {
     const timer = setInterval(nextSlide, SLIDE_INTERVAL_MS);
     return () => clearInterval(timer);
@@ -71,13 +102,13 @@ export default function Hero() {
 
             <div className="flex flex-wrap gap-4 animate-slide-up delay-225">
               <a
-                href="#products-section"
-                className="px-8 py-4 bg-[#2E7D32] hover:bg-[#2E7D32]/90 text-white font-semibold transition-all hover-lift"
+                href="#productos"
+                className="px-8 py-4 bg-[#1c6554] hover:bg-[#1c6554]/90 text-white font-semibold transition-all hover-lift shadow-lg hover:shadow-xl"
               >
                 {slide.cta}
               </a>
               <a
-                href="#categories-section"
+                href="#categorias"
                 className="px-8 py-4 bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/30 text-white font-semibold transition-all"
               >
                 Explorar categorías
@@ -121,6 +152,14 @@ export default function Hero() {
   );
 }
 
+/**
+ * Componente de estadística para el hero.
+ * 
+ * @param {Object} props
+ * @param {string} props.value - Valor a mostrar (ej: "2500+", "4.8★")
+ * @param {string} props.label - Etiqueta descriptiva (ej: "Productos")
+ * @returns {JSX.Element}
+ */
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div>

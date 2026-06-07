@@ -45,7 +45,7 @@ export default function CheckoutPage() {
           </p>
           <Link
             href="/"
-            className="inline-block px-8 py-3 bg-[#2E7D32] hover:bg-[#2E7D32]/90 text-white font-semibold transition-colors"
+            className="inline-block px-8 py-3 bg-[#1c6554] hover:bg-[#1c6554]/90 text-white font-semibold transition-colors"
           >
             Volver a la tienda
           </Link>
@@ -67,7 +67,7 @@ export default function CheckoutPage() {
           </p>
           <button
             onClick={() => router.push('/')}
-            className="px-8 py-3 bg-[#2E7D32] hover:bg-[#2E7D32]/90 text-white font-semibold transition-colors"
+            className="px-8 py-3 bg-[#1c6554] hover:bg-[#1c6554]/90 text-white font-semibold transition-colors"
           >
             Explorar productos
           </button>
@@ -96,7 +96,7 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3.5 mt-4 bg-[#2E7D32] hover:bg-[#2E7D32]/90 text-white font-semibold transition-all disabled:opacity-50"
+                className="w-full py-3.5 mt-4 bg-[#1c6554] hover:bg-[#1c6554]/90 text-white font-semibold transition-all disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
@@ -125,7 +125,7 @@ export default function CheckoutPage() {
                     </p>
                     <p className="text-slate-500">Cantidad: {item.quantity}</p>
                   </div>
-                  <p className="font-semibold text-[#2E7D32]">
+                  <p className="font-semibold text-[#1c6554]">
                     {formatPrice(item.product.price * item.quantity)}
                   </p>
                 </li>
@@ -145,7 +145,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-base font-bold pt-2 border-t border-slate-200 dark:border-slate-700">
                 <span>Total</span>
-                <span className="text-[#2E7D32]">{formatPrice(orderTotal)}</span>
+                <span className="text-[#1c6554]">{formatPrice(orderTotal)}</span>
               </div>
             </div>
           </section>

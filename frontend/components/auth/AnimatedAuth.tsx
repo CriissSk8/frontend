@@ -73,28 +73,31 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
   const registerFormClass = getPanelAnimationClass('register-form', isSignUp, hasInteracted);
 
   return (
-    <article className="bg-white dark:bg-slate-900 grid grid-cols-1 lg:grid-cols-2 w-full h-screen relative overflow-hidden">
-        {/* Logo en esquina superior derecha */}
-        <div className="absolute top-4 right-4 z-50 transition-all hover:scale-110" style={{
-          filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4)) drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
-        }}>
-          <Logo size="xl" />
-        </div>
+    <>
+      {/* Logo - posición dinámica según modo */}
+      <div className={`fixed z-[9999] transition-all duration-1000 ease-in-out hover:scale-110 pointer-events-auto ${
+        isSignUp ? 'top-4 right-4' : 'bottom-4 left-4'
+      }`} style={{
+        filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4)) drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+      }}>
+        <Logo size="xl" />
+      </div>
 
-        {/* Botón de regreso */}
-        <Link
-          href="/"
-          className="absolute top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 bg-white/90 hover:bg-white backdrop-blur-sm border border-slate-200 text-slate-700 hover:text-slate-900 transition-all hover:shadow-md group"
-        >
-          <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          <span className="text-sm font-medium">Volver al inicio</span>
-        </Link>
+      <Link
+        href="/"
+        className="fixed top-4 left-4 z-[9999] flex items-center gap-2 px-4 py-2 bg-white/90 hover:bg-white backdrop-blur-sm border border-slate-200 text-slate-700 hover:text-slate-900 transition-all hover:shadow-md group pointer-events-auto"
+      >
+        <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span className="text-sm font-medium">Volver al inicio</span>
+      </Link>
 
-        {/* Bloque rotado — misma lógica que el diseño original */}
+      {/* Article principal */}
+      <article className="bg-white dark:bg-slate-900 grid grid-cols-1 lg:grid-cols-2 w-full h-screen relative overflow-hidden">
+        {/* Bloque rotado con gradiente corporativo */}
         <div
-          className={`absolute bottom-0 bg-gradient-to-br from-[#0C447C] to-[#2E7D32] w-[200%] h-[200%] transition-all duration-1000 ease-in-out ${
+          className={`absolute bottom-0 bg-gradient-to-br from-[#0C447C] to-[#1c6554] w-[200%] h-[200%] transition-all duration-1000 ease-in-out ${
             isSignUp ? 'rotate-[-57deg] left-[-115%]' : 'rotate-[57deg] left-[15%]'
           }`}
           aria-hidden="true"
@@ -133,7 +136,7 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
           <div className="text-right -mt-2">
             <Link
               href="/auth/forgot-password"
-              className="text-sm text-[#2E7D32] hover:text-[#2E7D32]/70 font-semibold underline underline-offset-2"
+              className="text-sm text-[#1c6554] hover:text-[#1c6554]/70 font-semibold underline underline-offset-2"
             >
               ¿Olvidaste tu contraseña?
             </Link>
@@ -147,7 +150,7 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
               type="button"
               onClick={() => switchMode(true)}
               disabled={isAnimating}
-              className="font-bold text-[#2E7D32] hover:text-[#2E7D32]/70 transition-colors underline underline-offset-2"
+              className="font-bold text-[#1c6554] hover:text-[#1c6554]/70 transition-colors underline underline-offset-2"
             >
               Regístrate
             </button>
@@ -263,15 +266,15 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
               type="checkbox"
               id="terms"
               required
-              className="mt-1 w-4 h-4 accent-[#2E7D32]"
+              className="mt-1 w-4 h-4 accent-[#1c6554]"
             />
             <label htmlFor="terms" className="text-sm text-slate-600 dark:text-slate-400">
               Acepto los{' '}
-              <a href="/terminos" className="text-[#2E7D32] hover:underline font-medium">
+              <a href="/terminos" className="text-[#1c6554] hover:underline font-medium">
                 términos y condiciones
               </a>
               {' '}y la{' '}
-              <a href="/privacidad" className="text-[#2E7D32] hover:underline font-medium">
+              <a href="/privacidad" className="text-[#1c6554] hover:underline font-medium">
                 política de privacidad
               </a>
             </label>
@@ -286,7 +289,7 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
                 type="button"
                 onClick={() => switchMode(false)}
                 disabled={isAnimating}
-                className="font-bold text-[#2E7D32] hover:text-[#2E7D32]/70 transition-colors underline underline-offset-2"
+                className="font-bold text-[#1c6554] hover:text-[#1c6554]/70 transition-colors underline underline-offset-2"
               >
                 Inicia sesión
               </button>
@@ -294,6 +297,7 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
           </div>
         </form>
     </article>
+    </>
   );
 }
 
@@ -339,7 +343,7 @@ function AuthFormHeader({ title }: { title: string }) {
       <h2 className="text-3xl font-bold text-center lg:text-left text-slate-900 dark:text-white mb-3">
         {title}
       </h2>
-      <div className="w-12 h-1 bg-gradient-to-r from-[#0C447C] to-[#2E7D32] mx-auto lg:mx-0 mb-8"></div>
+      <div className="w-12 h-1 bg-gradient-to-r from-[#0C447C] to-[#1c6554] mx-auto lg:mx-0 mb-8"></div>
     </div>
   );
 }
@@ -359,7 +363,7 @@ function SubmitButton({
     <button
       type="submit"
       disabled={loading || disabled}
-      className="bg-gradient-to-r from-[#0C447C] to-[#2E7D32] text-white py-3.5 font-semibold hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:cursor-not-allowed hover-lift"
+      className="bg-gradient-to-r from-[#0C447C] to-[#1c6554] text-white py-3.5 font-semibold hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:cursor-not-allowed hover-lift"
     >
       {loading ? (
         <span className="flex items-center justify-center gap-2">
