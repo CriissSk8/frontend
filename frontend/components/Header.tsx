@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
-import ThemeToggle from '@/components/ThemeToggle';
 import CartDrawer from '@/components/CartDrawer';
 import { useCart } from '@/context/CartContext';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -33,8 +32,8 @@ export default function Header({ onSearch }: HeaderProps) {
       <header
         className={`sticky top-0 z-40 w-full transition-all duration-200 ${
           isScrolled
-            ? 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm border-b border-slate-200 dark:border-slate-800'
-            : 'bg-white dark:bg-slate-900'
+            ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200'
+            : 'bg-white'
         }`}
       >
         <div className="bg-gradient-to-r from-[#0C447C] to-[#2E7D32] text-white">
@@ -57,8 +56,8 @@ export default function Header({ onSearch }: HeaderProps) {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4 sm:gap-6 h-16 sm:h-20">
-            <Logo size="md" className="flex-shrink-0" />
+          <div className="flex items-center gap-4 sm:gap-6 h-18 sm:h-22">
+            <Logo size="lg" className="flex-shrink-0" />
 
             <div className="flex-1 max-w-2xl">
               <div className="relative">
@@ -67,7 +66,7 @@ export default function Header({ onSearch }: HeaderProps) {
                   placeholder="Buscar productos, marcas..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  className="w-full h-11 pl-11 pr-4 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#2E7D32] focus:ring-2 focus:ring-[#2E7D32]/20 transition-all"
+                  className="w-full h-11 pl-11 pr-4 border border-slate-300 bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-[#2E7D32] focus:ring-2 focus:ring-[#2E7D32]/20 transition-all"
                   aria-label="Buscar productos"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -87,7 +86,6 @@ export default function Header({ onSearch }: HeaderProps) {
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3">
-              <ThemeToggle />
               <button
                 type="button"
                 onClick={() => setIsOpen(true)}

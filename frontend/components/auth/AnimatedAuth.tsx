@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Logo from '@/components/Logo';
@@ -21,6 +21,7 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
   const [hasInteracted, setHasInteracted] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialMount, setIsInitialMount] = useState(true);
 
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [registerData, setRegisterData] = useState({ 
@@ -32,6 +33,12 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
     city: '',
     confirmPassword: ''
   });
+
+  // Desactivar la animación inicial después del primer render
+  useEffect(() => {
+    const timer = setTimeout(() => setIsInitialMount(false), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const switchMode = useCallback(
     (toSignUp: boolean) => {
@@ -67,6 +74,24 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
 
   return (
     <article className="bg-white dark:bg-slate-900 grid grid-cols-1 lg:grid-cols-2 w-full h-screen relative overflow-hidden">
+        {/* Logo en esquina superior derecha */}
+        <div className="absolute top-4 right-4 z-50 transition-all hover:scale-110" style={{
+          filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4)) drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+        }}>
+          <Logo size="xl" />
+        </div>
+
+        {/* Botón de regreso */}
+        <Link
+          href="/"
+          className="absolute top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 bg-white/90 hover:bg-white backdrop-blur-sm border border-slate-200 text-slate-700 hover:text-slate-900 transition-all hover:shadow-md group"
+        >
+          <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          <span className="text-sm font-medium">Volver al inicio</span>
+        </Link>
+
         {/* Bloque rotado — misma lógica que el diseño original */}
         <div
           className={`absolute bottom-0 bg-gradient-to-br from-[#0C447C] to-[#2E7D32] w-[200%] h-[200%] transition-all duration-1000 ease-in-out ${
@@ -78,9 +103,12 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
         {/* LOGIN FORM */}
         <form
           onSubmit={handleLoginSubmit}
-          className={`grid gap-8 content-center relative z-10 row-start-1 col-start-1 px-8 sm:px-12 lg:px-20 xl:px-24 py-10 ${loginFormClass} ${
+          className={`grid gap-8 content-center relative z-10 row-start-1 col-start-1 px-8 sm:px-12 lg:px-20 xl:px-24 py-10 ${
+            isInitialMount ? 'opacity-0' : ''
+          } ${loginFormClass} ${
             isSignUp ? 'hidden lg:grid' : 'grid'
           }`}
+          style={isInitialMount ? { animation: 'fadeIn 0.5s ease-out forwards' } : undefined}
         >
           <AuthFormHeader title="Iniciar sesión" />
 
@@ -128,7 +156,10 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
 
         {/* TEXTO DERECHO (visible en modo login) */}
         <div
-          className={`hidden lg:flex flex-col justify-center items-end gap-4 relative z-10 row-start-1 col-start-2 px-12 lg:px-20 xl:px-24 ${loginTextClass}`}
+          className={`hidden lg:flex flex-col justify-center items-end gap-4 relative z-10 row-start-1 col-start-2 px-12 lg:px-20 xl:px-24 ${
+            isInitialMount ? 'opacity-0' : ''
+          } ${loginTextClass}`}
+          style={isInitialMount ? { animation: 'fadeIn 0.5s ease-out 0.2s forwards' } : undefined}
         >
           <h3 className="text-4xl xl:text-5xl uppercase font-black text-slate-900 max-w-[320px] text-right leading-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)]">
             ¡Bienvenido!
@@ -140,7 +171,10 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
 
         {/* TEXTO IZQUIERDO (visible en modo registro) */}
         <div
-          className={`hidden lg:flex flex-col justify-center items-start gap-4 relative z-10 row-start-1 col-start-1 px-12 lg:px-20 xl:px-24 ${registerTextClass}`}
+          className={`hidden lg:flex flex-col justify-center items-start gap-4 relative z-10 row-start-1 col-start-1 px-12 lg:px-20 xl:px-24 ${
+            isInitialMount ? 'opacity-0' : ''
+          } ${registerTextClass}`}
+          style={isInitialMount ? { animation: 'fadeIn 0.5s ease-out 0.2s forwards' } : undefined}
         >
           <h3 className="text-4xl xl:text-5xl uppercase font-black text-slate-900 max-w-[320px] text-left leading-tight drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)]">
             ¡Únete!
@@ -153,9 +187,12 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
         {/* REGISTER FORM */}
         <form
           onSubmit={handleRegisterSubmit}
-          className={`grid gap-6 content-start relative z-10 row-start-1 col-start-2 px-8 sm:px-12 lg:px-20 xl:px-24 py-10 overflow-y-auto max-h-screen ${registerFormClass} ${
+          className={`grid gap-6 content-start relative z-10 row-start-1 col-start-2 px-8 sm:px-12 lg:px-20 xl:px-24 py-10 overflow-y-auto max-h-screen ${
+            isInitialMount ? 'opacity-0' : ''
+          } ${registerFormClass} ${
             isSignUp ? 'grid' : 'hidden lg:grid'
           }`}
+          style={isInitialMount ? { animation: 'fadeIn 0.5s ease-out forwards' } : undefined}
         >
           <AuthFormHeader title="Crear cuenta" />
 
@@ -299,10 +336,10 @@ function getPanelAnimationClass(panel: PanelId, isSignUp: boolean, hasInteracted
 function AuthFormHeader({ title }: { title: string }) {
   return (
     <div>
-      <Logo size="lg" className="mb-6 justify-center lg:justify-start" />
-      <h2 className="text-2xl font-bold text-center lg:text-left text-slate-900 dark:text-white after:block after:w-10 after:h-1 after:bg-[#2E7D32] after:mx-auto lg:after:mx-0 after:mt-2">
+      <h2 className="text-3xl font-bold text-center lg:text-left text-slate-900 dark:text-white mb-3">
         {title}
       </h2>
+      <div className="w-12 h-1 bg-gradient-to-r from-[#0C447C] to-[#2E7D32] mx-auto lg:mx-0 mb-8"></div>
     </div>
   );
 }

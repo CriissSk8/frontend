@@ -36,7 +36,7 @@ export default function Hero() {
 
   return (
     <section className="relative bg-slate-900 overflow-hidden">
-      <div className="relative h-[500px] sm:h-[600px] lg:h-[650px]">
+      <div className="relative h-[400px] sm:h-[450px] lg:h-[550px]">
         <div className="absolute inset-0">
           <Image
             key={slide.id}
