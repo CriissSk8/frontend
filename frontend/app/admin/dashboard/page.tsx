@@ -13,40 +13,87 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getAllOrders } from '@/lib/api-admin';
+import { getProducts } from '@/lib/api';
 
 export default function DashboardPage() {
-  // TODO: Estos datos vendrán del backend
-  const stats = {
-    totalSales: 15_450_000,
-    totalOrders: 342,
-    totalUsers: 1_289,
-    activeOrders: 23,
-  };
+  const [stats, setStats] = useState({
+    totalSales: 0,
+    totalOrders: 0,
+    totalUsers: 0,
+    activeOrders: 0,
+  });
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const recentOrders = [
-    {
-      id: 'ORD-001',
-      customer: 'Juan Pérez',
-      total: 85_000,
-      status: 'pending',
-      date: '2026-06-07 13:45',
-    },
-    {
-      id: 'ORD-002',
-      customer: 'María García',
-      total: 120_500,
-      status: 'completed',
-      date: '2026-06-07 12:30',
-    },
-    {
-      id: 'ORD-003',
-      customer: 'Carlos López',
-      total: 65_000,
-      status: 'processing',
-      date: '2026-06-07 11:15',
-    },
-  ];
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  async function loadDashboardData() {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Obtener órdenes (máximo 50 permitido por el validador)
+      const { data: orders } = await getAllOrders({ limit: 50 });
+      
+      // Calcular estadísticas
+      const totalSales = orders.reduce((sum, order) => sum + Number(order.total), 0);
+      const activeOrders = orders.filter(o => 
+        ['PENDING', 'PAID', 'PREPARING', 'DISPATCHED'].includes(o.status)
+      ).length;
+      
+      // Obtener usuarios únicos
+      const uniqueCustomers = new Set(orders.map(o => o.customerId));
+      
+      setStats({
+        totalSales,
+        totalOrders: orders.length,
+        totalUsers: uniqueCustomers.size,
+        activeOrders,
+      });
+      
+      // Ordenar por fecha más reciente
+      const sorted = orders
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 5);
+      
+      setRecentOrders(sorted);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar datos del dashboard');
+      console.error('Error loading dashboard:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1c6554] mx-auto"></div>
+          <p className="mt-4 text-slate-600">Cargando dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 p-4">
+        <p className="text-red-800">Error: {error}</p>
+        <button
+          onClick={loadDashboardData}
+          className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -190,16 +237,20 @@ export default function DashboardPage() {
               {recentOrders.map((order) => (
                 <tr key={order.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-medium text-slate-900">
-                    {order.id}
+                    {order.id.substring(0, 8)}...
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{order.customer}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">
+                    {order.customer?.name || 'Cliente'}
+                  </td>
                   <td className="px-6 py-4 text-sm font-semibold text-slate-900">
-                    {formatPrice(order.total)}
+                    {formatPrice(Number(order.total))}
                   </td>
                   <td className="px-6 py-4">
-                    <StatusBadge status={order.status} />
+                    <StatusBadge status={order.status.toLowerCase()} />
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{order.date}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">
+                    {new Date(order.createdAt).toLocaleString('es-CO')}
+                  </td>
                   <td className="px-6 py-4 text-right">
                     <button
                       onClick={() => alert(`Ver detalles del pedido ${order.id}`)}
@@ -267,25 +318,29 @@ function StatCard({ title, value, subtitle, icon, trend, trendUp }: StatCardProp
 function StatusBadge({ status }: { status: string }) {
   const styles = {
     pending: 'bg-amber-100 text-amber-800',
-    processing: 'bg-blue-100 text-blue-800',
-    completed: 'bg-green-100 text-green-800',
+    paid: 'bg-blue-100 text-blue-800',
+    preparing: 'bg-purple-100 text-purple-800',
+    dispatched: 'bg-indigo-100 text-indigo-800',
+    delivered: 'bg-green-100 text-green-800',
     cancelled: 'bg-red-100 text-red-800',
   };
 
   const labels = {
     pending: 'Pendiente',
-    processing: 'Procesando',
-    completed: 'Completado',
+    paid: 'Pagado',
+    preparing: 'Preparando',
+    dispatched: 'En camino',
+    delivered: 'Entregado',
     cancelled: 'Cancelado',
   };
 
   return (
     <span
       className={`inline-flex px-2 py-1 text-xs font-medium ${
-        styles[status as keyof typeof styles]
+        styles[status as keyof typeof styles] || 'bg-slate-100 text-slate-800'
       }`}
     >
-      {labels[status as keyof typeof labels]}
+      {labels[status as keyof typeof labels] || status}
     </span>
   );
 }

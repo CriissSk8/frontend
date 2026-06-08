@@ -1,12 +1,21 @@
+/**
+ * Checkout Page — New Era Supermercado
+ *
+ * Formulario de finalización de compra con resumen del carrito.
+ * Nota: el pedido aún es simulado (pendiente integración con POST /api/orders).
+ *
+ * @module app/(shop)/checkout/page
+ */
+
 'use client';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Header from '@/components/Header';
+import CategoryIcon from '@/components/CategoryIcon';
 import { useCart } from '@/context/CartContext';
 import { formatPrice, getOrderTotal, getShippingCost } from '@/lib/format';
-import { getCategoryEmoji } from '@/lib/constants';
 import LoadingSpinner from '@/components/auth/LoadingSpinner';
 
 export default function CheckoutPage() {
@@ -118,7 +127,10 @@ export default function CheckoutPage() {
             <ul className="space-y-3 mb-6">
               {items.map((item) => (
                 <li key={item.product.id} className="flex items-center gap-3 text-sm">
-                  <span className="text-2xl">{getCategoryEmoji(item.product.categoryId)}</span>
+                  <CategoryIcon
+                    name={item.product.category?.name || 'Todos los productos'}
+                    className="w-10 h-10"
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-slate-900 dark:text-white line-clamp-1">
                       {item.product.name}

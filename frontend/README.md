@@ -88,13 +88,13 @@ frontend/
 │   └── globals.css              # Estilos globales
 │
 ├── components/                   # Componentes React
+│   ├── admin/                   # Componentes del panel admin
+│   │   ├── ImageUpload.tsx      # Subida de imágenes
+│   │   └── ProtectedRoute.tsx   # Guard de rutas admin
 │   ├── auth/                    # Componentes de autenticación
-│   │   ├── AnimatedAuth.tsx     # Container animado de auth
+│   │   ├── AnimatedAuth.tsx     # Login/registro animado
 │   │   ├── AuthField.tsx        # Campo de formulario
-│   │   ├── AuthLayout.tsx       # Layout para páginas legales
-│   │   ├── LoadingSpinner.tsx   # Spinner de carga
-│   │   ├── PasswordField.tsx    # Campo de contraseña
-│   │   └── SocialLoginButtons.tsx # Botones de login social
+│   │   └── LoadingSpinner.tsx   # Spinner de carga
 │   ├── CartDrawer.tsx           # Drawer lateral del carrito
 │   ├── Categories.tsx           # Sección de categorías
 │   ├── CategoryIcon.tsx         # Iconos SVG de categorías
@@ -105,6 +105,7 @@ frontend/
 │   ├── Logo.tsx                 # Logo del supermercado
 │   ├── ProductCard.tsx          # Tarjeta de producto
 │   ├── ProductsGrid.tsx         # Grid de productos
+│   ├── PromotionPopup.tsx       # Popup de promociones
 │   └── Providers.tsx            # Providers (Context, Theme)
 │
 ├── context/                      # Contextos de React
@@ -114,10 +115,10 @@ frontend/
 │   └── useDebounce.ts           # Hook de debouncing
 │
 ├── lib/                          # Utilidades y tipos
-│   ├── data/                    # Datos mock
-│   │   ├── catalog.ts           # Productos y categorías mock
-│   │   └── hero-slides.ts       # Slides del hero
-│   ├── api.ts                   # Cliente API (mock + real)
+│   ├── data/
+│   │   └── hero-slides.ts       # Slides del hero carousel
+│   ├── api.ts                   # API pública (categorías, productos, promos)
+│   ├── api-admin.ts             # API admin (requiere JWT)
 │   ├── constants.ts             # Constantes de la app
 │   ├── format.ts                # Funciones de formateo
 │   └── types.ts                 # Definiciones de tipos

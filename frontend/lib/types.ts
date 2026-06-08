@@ -64,6 +64,25 @@ export interface CartItem {
 }
 
 /**
+ * Promoción del sistema (popup y banners).
+ * Alineado con el modelo Prisma Promotion.
+ */
+export interface Promotion {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl?: string | null;
+  ctaText: string;
+  ctaLink?: string | null;
+  isActive?: boolean;
+  startDate?: string;
+  endDate?: string | null;
+  priority: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
  * Contexto del carrito de compras.
  * 
  * Define la interfaz del CartContext que maneja el estado del carrito.

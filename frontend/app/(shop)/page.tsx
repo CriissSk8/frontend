@@ -18,7 +18,6 @@ import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import Categories from '@/components/Categories';
 import ProductsGrid from '@/components/ProductsGrid';
-import PromotionModal from '@/components/PromotionModal';
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,16 +33,19 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Modal de promociones (aparece automáticamente) */}
-      <PromotionModal />
-      
       <Header onSearch={handleSearch} />
-      <Hero />
-      <Categories
-        selectedCategory={selectedCategory}
-        onSelectCategory={handleCategorySelect}
-      />
-      <ProductsGrid searchQuery={searchQuery} selectedCategory={selectedCategory} />
+      <section id="hero">
+        <Hero />
+      </section>
+      <section id="categorias">
+        <Categories
+          selectedCategory={selectedCategory}
+          onSelectCategory={handleCategorySelect}
+        />
+      </section>
+      <section id="productos">
+        <ProductsGrid searchQuery={searchQuery} selectedCategory={selectedCategory} />
+      </section>
     </>
   );
 }

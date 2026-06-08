@@ -13,17 +13,55 @@
 
 'use client';
 
-import { useState } from 'react';
-import { MOCK_CATEGORIES, MOCK_PRODUCTS } from '@/lib/data/catalog';
+import { useState, useEffect } from 'react';
+import { getCategories, getProducts } from '@/lib/api';
+import { 
+  createCategory, 
+  updateCategory, 
+  deleteCategory 
+} from '@/lib/api-admin';
+import type { Category } from '@/lib/types';
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState(MOCK_CATEGORIES);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [productCounts, setProductCounts] = useState<Record<string, number>>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Cargar datos iniciales
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const [categoriesData, productsData] = await Promise.all([
+        getCategories(),
+        getProducts()
+      ]);
+      setCategories(categoriesData);
+      
+      // Contar productos por categoría
+      const counts: Record<string, number> = {};
+      productsData.forEach((product) => {
+        counts[product.categoryId] = (counts[product.categoryId] || 0) + 1;
+      });
+      setProductCounts(counts);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar datos');
+      console.error('Error loading data:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   // Contar productos por categoría
   const getProductCount = (categoryId: string) => {
-    return MOCK_PRODUCTS.filter((p) => p.categoryId === categoryId).length;
+    return productCounts[categoryId] || 0;
   };
 
   const handleAddCategory = () => {
@@ -31,21 +69,70 @@ export default function CategoriesPage() {
     setIsModalOpen(true);
   };
 
-  const handleEditCategory = (category: any) => {
+  const handleEditCategory = (category: Category) => {
     setEditingCategory(category);
     setIsModalOpen(true);
   };
 
-  const handleDeleteCategory = (categoryId: string) => {
+  const handleDeleteCategory = async (categoryId: string) => {
     const productCount = getProductCount(categoryId);
     if (productCount > 0) {
       alert(`No puedes eliminar esta categoría porque tiene ${productCount} productos asociados`);
       return;
     }
-    if (confirm('¿Estás seguro de eliminar esta categoría?')) {
+    if (!confirm('¿Estás seguro de eliminar esta categoría?')) return;
+
+    try {
+      await deleteCategory(categoryId);
       setCategories((prev) => prev.filter((c) => c.id !== categoryId));
+    } catch (err: any) {
+      alert('Error al eliminar categoría: ' + err.message);
     }
   };
+
+  const handleSaveCategory = async (categoryData: { name: string }) => {
+    try {
+      if (editingCategory) {
+        // Editar categoría existente
+        const updated = await updateCategory(editingCategory.id, categoryData);
+        setCategories((prev) =>
+          prev.map((c) => (c.id === updated.id ? updated : c))
+        );
+      } else {
+        // Crear nueva categoría
+        const newCategory = await createCategory(categoryData);
+        setCategories((prev) => [newCategory, ...prev]);
+      }
+      setIsModalOpen(false);
+    } catch (err: any) {
+      alert('Error al guardar categoría: ' + err.message);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1c6554] mx-auto"></div>
+          <p className="mt-4 text-slate-600">Cargando categorías...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 p-4">
+        <p className="text-red-800">Error: {error}</p>
+        <button
+          onClick={loadData}
+          className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -112,19 +199,7 @@ export default function CategoriesPage() {
         <CategoryModal
           category={editingCategory}
           onClose={() => setIsModalOpen(false)}
-          onSave={(category) => {
-            if (editingCategory) {
-              setCategories((prev) =>
-                prev.map((c) => (c.id === editingCategory.id ? { ...c, ...category } : c))
-              );
-            } else {
-              setCategories((prev) => [
-                ...prev,
-                { id: `cat-${Date.now()}`, ...category },
-              ]);
-            }
-            setIsModalOpen(false);
-          }}
+          onSave={handleSaveCategory}
         />
       )}
     </div>
@@ -134,9 +209,9 @@ export default function CategoriesPage() {
 // ==================== MODAL DE CATEGORÍA ====================
 
 interface CategoryModalProps {
-  category: any;
+  category: Category | null;
   onClose: () => void;
-  onSave: (category: any) => void;
+  onSave: (category: { name: string }) => void;
 }
 
 function CategoryModal({ category, onClose, onSave }: CategoryModalProps) {

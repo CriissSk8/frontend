@@ -1,3 +1,11 @@
+/**
+ * Forgot Password Page — New Era Supermercado
+ *
+ * Formulario de recuperación de contraseña (simulado, sin backend aún).
+ *
+ * @module app/auth/forgot-password/page
+ */
+
 'use client';
 
 import { useState } from 'react';

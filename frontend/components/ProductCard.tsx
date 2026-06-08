@@ -42,16 +42,32 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <article className="group relative bg-white border border-slate-200 overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
       <div className="relative aspect-square bg-slate-100 flex items-center justify-center overflow-hidden">
-        <svg 
-          className="w-24 h-24 text-slate-300 transition-transform duration-300 group-hover:scale-110" 
-          fill="none" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor" 
-          strokeWidth={1}
-          aria-hidden="true"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-        </svg>
+        {product.imageUrl ? (
+          <img 
+            src={product.imageUrl} 
+            alt={product.name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+            onError={(e) => {
+              // Fallback a icono si la imagen no carga
+              e.currentTarget.style.display = 'none';
+              const parent = e.currentTarget.parentElement;
+              if (parent) {
+                parent.innerHTML = '<svg class="w-24 h-24 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>';
+              }
+            }}
+          />
+        ) : (
+          <svg 
+            className="w-24 h-24 text-slate-300 transition-transform duration-300 group-hover:scale-110" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor" 
+            strokeWidth={1}
+            aria-hidden="true"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        )}
 
         {isOutOfStock && (
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center">

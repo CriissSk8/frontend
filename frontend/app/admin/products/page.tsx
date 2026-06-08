@@ -15,14 +15,48 @@
 
 'use client';
 
-import { useState } from 'react';
-import { MOCK_PRODUCTS, MOCK_CATEGORIES } from '@/lib/data/catalog';
+import { useState, useEffect } from 'react';
+import { getProducts, getCategories } from '@/lib/api';
+import { 
+  createProduct, 
+  updateProduct, 
+  deleteProduct 
+} from '@/lib/api-admin';
+import type { Product, Category } from '@/lib/types';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState(MOCK_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
+
+  // Cargar datos iniciales
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const [productsData, categoriesData] = await Promise.all([
+        getProducts(),
+        getCategories()
+      ]);
+      setProducts(productsData);
+      setCategories(categoriesData);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar datos');
+      console.error('Error loading data:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   // Filtrar productos por búsqueda
   const filteredProducts = products.filter((product) =>
@@ -34,29 +68,103 @@ export default function ProductsPage() {
     setIsModalOpen(true);
   };
 
-  const handleEditProduct = (product: any) => {
+  const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
     setIsModalOpen(true);
   };
 
   const handleToggleFeatured = (productId: string) => {
-    // TODO: Implementar con backend
+    // TODO: Implementar campo "featured" en el backend
     console.log('Toggle featured:', productId);
   };
 
-  const handleToggleActive = (productId: string) => {
-    setProducts((prev) =>
-      prev.map((p) =>
-        p.id === productId ? { ...p, isActive: !p.isActive } : p
-      )
-    );
-  };
+  const handleToggleActive = async (productId: string) => {
+    try {
+      const product = products.find((p) => p.id === productId);
+      if (!product) return;
 
-  const handleDeleteProduct = (productId: string) => {
-    if (confirm('¿Estás seguro de eliminar este producto?')) {
-      setProducts((prev) => prev.filter((p) => p.id !== productId));
+      await updateProduct(productId, { isActive: !product.isActive });
+      
+      // Actualizar estado local
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId ? { ...p, isActive: !p.isActive } : p
+        )
+      );
+    } catch (err: any) {
+      alert('Error al cambiar estado: ' + err.message);
     }
   };
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (!confirm('¿Estás seguro de eliminar este producto?')) return;
+
+    try {
+      await deleteProduct(productId);
+      setProducts((prev) => prev.filter((p) => p.id !== productId));
+    } catch (err: any) {
+      alert('Error al eliminar producto: ' + err.message);
+    }
+  };
+
+  const handleSaveProduct = async (productData: any) => {
+    try {
+      if (editingProduct) {
+        // Editar producto existente
+        const updated = await updateProduct(editingProduct.id, {
+          name: productData.name,
+          description: productData.description || null,
+          price: Number(productData.price),
+          stock: Number(productData.stock),
+          categoryId: productData.categoryId,
+          imageUrl: productData.imageUrl || null,
+        });
+        setProducts((prev) =>
+          prev.map((p) => (p.id === updated.id ? updated : p))
+        );
+      } else {
+        // Crear nuevo producto
+        const newProduct = await createProduct({
+          name: productData.name,
+          description: productData.description || null,
+          price: Number(productData.price),
+          stock: Number(productData.stock),
+          categoryId: productData.categoryId,
+          imageUrl: productData.imageUrl || null,
+          isActive: true,
+        });
+        setProducts((prev) => [newProduct, ...prev]);
+      }
+      setIsModalOpen(false);
+    } catch (err: any) {
+      alert('Error al guardar producto: ' + err.message);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1c6554] mx-auto"></div>
+          <p className="mt-4 text-slate-600">Cargando productos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 p-4">
+        <p className="text-red-800">Error: {error}</p>
+        <button
+          onClick={loadData}
+          className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -92,7 +200,7 @@ export default function ProductsPage() {
           </div>
           <select className="h-10 px-4 border border-slate-300 text-sm focus:outline-none focus:border-[#1c6554]">
             <option value="">Todas las categorías</option>
-            {MOCK_CATEGORIES.map((cat) => (
+            {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
               </option>
@@ -140,8 +248,20 @@ export default function ProductsPage() {
                 <tr key={product.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-slate-100 flex items-center justify-center flex-shrink-0">
-                        <PackageIcon />
+                      <div className="w-12 h-12 bg-slate-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {product.imageUrl && !imageErrors.has(product.id) ? (
+                          <img 
+                            src={product.imageUrl} 
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                            onError={() => {
+                              // Marcar imagen como fallida para mostrar ícono
+                              setImageErrors(prev => new Set(prev).add(product.id));
+                            }}
+                          />
+                        ) : (
+                          <PackageIcon />
+                        )}
                       </div>
                       <div>
                         <p className="font-medium text-slate-900">{product.name}</p>
@@ -219,12 +339,9 @@ export default function ProductsPage() {
       {isModalOpen && (
         <ProductModal
           product={editingProduct}
+          categories={categories}
           onClose={() => setIsModalOpen(false)}
-          onSave={(product) => {
-            // TODO: Implementar guardado con backend
-            console.log('Guardar producto:', product);
-            setIsModalOpen(false);
-          }}
+          onSave={handleSaveProduct}
         />
       )}
     </div>
@@ -234,23 +351,37 @@ export default function ProductsPage() {
 // ==================== MODAL DE PRODUCTO ====================
 
 interface ProductModalProps {
-  product: any;
+  product: Product | null;
+  categories: Category[];
   onClose: () => void;
   onSave: (product: any) => void;
 }
 
-function ProductModal({ product, onClose, onSave }: ProductModalProps) {
+function ProductModal({ product, categories, onClose, onSave }: ProductModalProps) {
   const [formData, setFormData] = useState({
     name: product?.name || '',
     description: product?.description || '',
-    price: product?.price || '',
-    stock: product?.stock || '',
+    price: product?.price.toString() || '',
+    stock: product?.stock.toString() || '',
     categoryId: product?.categoryId || '',
+    imageUrl: product?.imageUrl || '',
   });
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     onSave(formData);
+  };
+
+  const handleImageUploaded = (imageUrl: string) => {
+    setFormData({ ...formData, imageUrl });
+    setUploadError(null);
+  };
+
+  const handleImageError = (error: string) => {
+    setUploadError(error);
   };
 
   return (
@@ -269,6 +400,20 @@ function ProductModal({ product, onClose, onSave }: ProductModalProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Alerta de error de imagen */}
+          {uploadError && (
+            <div className="bg-red-50 border border-red-200 p-3 rounded">
+              <p className="text-sm text-red-800">{uploadError}</p>
+            </div>
+          )}
+
+          {/* Componente de subida de imagen */}
+          <ImageUpload
+            currentImage={formData.imageUrl}
+            onImageUploaded={handleImageUploaded}
+            onError={handleImageError}
+          />
+
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Nombre del producto *
@@ -337,7 +482,7 @@ function ProductModal({ product, onClose, onSave }: ProductModalProps) {
               className="w-full h-10 px-3 border border-slate-300 focus:outline-none focus:border-[#1c6554] focus:ring-2 focus:ring-[#1c6554]/20"
             >
               <option value="">Seleccionar categoría</option>
-              {MOCK_CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
                 </option>
@@ -349,15 +494,27 @@ function ProductModal({ product, onClose, onSave }: ProductModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+              disabled={isSubmitting}
+              className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-[#1c6554] hover:bg-[#1c6554]/90 text-white text-sm font-medium transition-colors"
+              disabled={isSubmitting}
+              className="px-4 py-2 bg-[#1c6554] hover:bg-[#1c6554]/90 text-white text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {product ? 'Guardar Cambios' : 'Agregar Producto'}
+              {isSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Guardando...
+                </span>
+              ) : (
+                product ? 'Guardar Cambios' : 'Agregar Producto'
+              )}
             </button>
           </div>
         </form>

@@ -1,3 +1,20 @@
+/**
+ * AnimatedAuth Component - New Era Supermercado
+ * 
+ * Componente de autenticación con formularios de login y registro animados.
+ * Incluye validación de campos, manejo de errores y redirección según el rol del usuario.
+ * 
+ * Características:
+ * - Alternancia animada entre login y registro
+ * - Validación de contraseñas coincidentes en registro
+ * - Almacenamiento automático del token JWT
+ * - Redirección basada en rol (ADMIN → /admin/dashboard, USER → /)
+ * - Estados de carga con spinners
+ * - Manejo de errores con alertas al usuario
+ * 
+ * @module components/auth/AnimatedAuth
+ */
+
 'use client';
 
 import { useCallback, useState, useEffect } from 'react';
@@ -6,31 +23,40 @@ import { useRouter } from 'next/navigation';
 import Logo from '@/components/Logo';
 import AuthField from '@/components/auth/AuthField';
 import LoadingSpinner from '@/components/auth/LoadingSpinner';
+import { login, register } from '@/lib/api-admin';
 
+/** Tipo de modo de autenticación */
 type AuthMode = 'login' | 'register';
 
+/** Props del componente AnimatedAuth */
 interface AnimatedAuthProps {
+  /** Modo inicial (login o register) */
   initialMode?: AuthMode;
 }
 
+/** Duración de las animaciones en milisegundos */
 const ANIMATION_MS = 500;
 
 export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProps) {
   const router = useRouter();
+  
+  // Estados para controlar la UI y animaciones
   const [isSignUp, setIsSignUp] = useState(initialMode === 'register');
   const [hasInteracted, setHasInteracted] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialMount, setIsInitialMount] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Datos del formulario de login
   const [loginData, setLoginData] = useState({ email: '', password: '' });
+  
+  // Datos del formulario de registro
   const [registerData, setRegisterData] = useState({ 
     name: '', 
     email: '', 
     password: '',
     phone: '',
-    address: '',
-    city: '',
     confirmPassword: ''
   });
 
@@ -40,31 +66,102 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
     return () => clearTimeout(timer);
   }, []);
 
+  /**
+   * Alterna entre modo login y registro con animación
+   * 
+   * @param {boolean} toSignUp - true para cambiar a registro, false para login
+   */
   const switchMode = useCallback(
     (toSignUp: boolean) => {
       if (isAnimating || isSignUp === toSignUp) return;
+      
+      // Limpiar errores al cambiar de modo
+      setError(null);
       setHasInteracted(true);
       setIsAnimating(true);
       setIsSignUp(toSignUp);
+      
+      // Esperar que termine la animación
       setTimeout(() => setIsAnimating(false), ANIMATION_MS);
     },
     [isAnimating, isSignUp]
   );
 
+  /**
+   * Maneja el submit del formulario de login
+   * Conecta con el backend para autenticar al usuario
+   * 
+   * @param {React.FormEvent} event - Evento del formulario
+   */
   async function handleLoginSubmit(event: React.FormEvent) {
     event.preventDefault();
+    setError(null);
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    setIsLoading(false);
-    router.push('/');
+
+    try {
+      // Llamada a la API de login
+      const { user } = await login({
+        email: loginData.email,
+        password: loginData.password
+      });
+
+      // Redirección según el rol del usuario
+      if (user.role === 'ADMIN') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/');
+      }
+    } catch (err: any) {
+      // Mostrar error al usuario
+      setError(err.message || 'Error al iniciar sesión. Verifica tus credenciales.');
+      setIsLoading(false);
+    }
   }
 
+  /**
+   * Maneja el submit del formulario de registro
+   * Conecta con el backend para crear un nuevo usuario
+   * 
+   * @param {React.FormEvent} event - Evento del formulario
+   */
   async function handleRegisterSubmit(event: React.FormEvent) {
     event.preventDefault();
+    setError(null);
+
+    // Validar que las contraseñas coincidan
+    if (registerData.password !== registerData.confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      return;
+    }
+
+    // Validar longitud mínima de contraseña
+    if (registerData.password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    setIsLoading(false);
-    router.push('/');
+
+    try {
+      // Llamada a la API de registro
+      const { user } = await register({
+        name: registerData.name,
+        email: registerData.email,
+        password: registerData.password,
+        phone: registerData.phone
+      });
+
+      // Redirección según el rol del usuario (generalmente USER para nuevos registros)
+      if (user.role === 'ADMIN') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/');
+      }
+    } catch (err: any) {
+      // Mostrar error al usuario
+      setError(err.message || 'Error al crear la cuenta. Intenta con otro correo.');
+      setIsLoading(false);
+    }
   }
 
   const loginFormClass = getPanelAnimationClass('login-form', isSignUp, hasInteracted);
@@ -83,6 +180,7 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
         <Logo size="xl" />
       </div>
 
+      {/* Botón volver al inicio */}
       <Link
         href="/"
         className="fixed top-4 left-4 z-[9999] flex items-center gap-2 px-4 py-2 bg-white/90 hover:bg-white backdrop-blur-sm border border-slate-200 text-slate-700 hover:text-slate-900 transition-all hover:shadow-md group pointer-events-auto"
@@ -92,6 +190,34 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
         </svg>
         <span className="text-sm font-medium">Volver al inicio</span>
       </Link>
+
+      {/* Alerta de error global */}
+      {error && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[10000] max-w-md w-full mx-4 animate-slideDown pointer-events-auto">
+          <div className="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 p-4 rounded-r-lg shadow-lg">
+            <div className="flex items-start gap-3">
+              {/* Icono de error */}
+              <svg className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-red-800 dark:text-red-200">Error</p>
+                <p className="text-sm text-red-700 dark:text-red-300 mt-1">{error}</p>
+              </div>
+              {/* Botón cerrar */}
+              <button
+                onClick={() => setError(null)}
+                className="text-red-400 hover:text-red-600 dark:text-red-300 dark:hover:text-red-100 transition-colors"
+                aria-label="Cerrar alerta"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Article principal */}
       <article className="bg-white dark:bg-slate-900 grid grid-cols-1 lg:grid-cols-2 w-full h-screen relative overflow-hidden">
@@ -223,22 +349,7 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
             value={registerData.phone}
             onChange={(phone) => setRegisterData((prev) => ({ ...prev, phone }))}
             icon={<PhoneIcon />}
-          />
-
-          <AuthField
-            id="register-address"
-            label="Dirección de entrega"
-            value={registerData.address}
-            onChange={(address) => setRegisterData((prev) => ({ ...prev, address }))}
-            icon={<MapIcon />}
-          />
-
-          <AuthField
-            id="register-city"
-            label="Ciudad"
-            value={registerData.city}
-            onChange={(city) => setRegisterData((prev) => ({ ...prev, city }))}
-            icon={<MapIcon />}
+            placeholder="3001234567"
           />
 
           <AuthField
@@ -248,7 +359,8 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
             value={registerData.password}
             onChange={(password) => setRegisterData((prev) => ({ ...prev, password }))}
             icon={<LockIcon />}
-            minLength={8}
+            minLength={6}
+            placeholder="Mínimo 6 caracteres"
           />
 
           <AuthField
@@ -258,7 +370,8 @@ export default function AnimatedAuth({ initialMode = 'login' }: AnimatedAuthProp
             value={registerData.confirmPassword}
             onChange={(confirmPassword) => setRegisterData((prev) => ({ ...prev, confirmPassword }))}
             icon={<LockIcon />}
-            minLength={8}
+            minLength={6}
+            placeholder="Repite tu contraseña"
           />
 
           <div className="flex items-start gap-2">
@@ -414,10 +527,3 @@ function PhoneIcon() {
   );
 }
 
-function MapIcon() {
-  return (
-    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-      <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-    </svg>
-  );
-}

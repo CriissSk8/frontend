@@ -15,6 +15,7 @@
 'use client';
 
 import { useState } from 'react';
+import { formatPrice } from '@/lib/format';
 
 interface User {
   id: string;
@@ -494,16 +495,6 @@ function StatusBadge({ status }: { status: string }) {
       {labels[status as keyof typeof labels]}
     </span>
   );
-}
-
-// ==================== UTILIDADES ====================
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    minimumFractionDigits: 0,
-  }).format(price);
 }
 
 // ==================== ICONOS ====================

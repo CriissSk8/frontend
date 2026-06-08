@@ -22,15 +22,3 @@ export const CART_STORAGE_KEY = 'new-era-cart';
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api';
 
-/** Emoji por defecto para categorías sin icono asignado */
-export const DEFAULT_CATEGORY_EMOJI = '📦';
-
-/**
- * Obtiene el emoji asociado a un ID de categoría
- * @deprecated Usar CategoryIcon component en su lugar
- * @param categoryId - ID de la categoría
- * @returns Emoji de la categoría o emoji por defecto
- */
-export function getCategoryEmoji(categoryId: string): string {
-  return DEFAULT_CATEGORY_EMOJI;
-}

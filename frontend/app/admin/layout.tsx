@@ -2,19 +2,31 @@
  * Admin Layout - New Era Supermercado
  * 
  * Layout principal del dashboard de administración con sidebar profesional.
- * Sigue la estética del proyecto: limpio, sin emojis, colores corporativos.
+ * Incluye protección de rutas mediante ProtectedRoute.
+ * 
+ * Características:
+ * - Sidebar colapsable
+ * - Navegación con indicador de página activa
+ * - Header con notificaciones
+ * - Logout funcional
+ * - Protección de rutas (solo ADMIN)
+ * - Información del usuario autenticado
  * 
  * @module app/admin/layout
  */
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Logo from '@/components/Logo';
+import ProtectedRoute from '@/components/admin/ProtectedRoute';
+import { logout, getCurrentUser } from '@/lib/api-admin';
 
+/** Props del componente AdminLayout */
 interface AdminLayoutProps {
+  /** Contenido de las páginas hijas */
   children: React.ReactNode;
 }
 
@@ -23,7 +35,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
+  // Obtener datos del usuario al montar el componente
+  useEffect(() => {
+    const currentUser = getCurrentUser();
+    setUser(currentUser);
+  }, []);
+
+  /** Enlaces de navegación del sidebar */
   const navLinks = [
     {
       name: 'Dashboard',
@@ -53,17 +73,23 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   ];
 
   /**
-   * Cierra sesión y redirige a la landing
+   * Cierra sesión del usuario.
+   * Elimina el token y datos de localStorage y redirige a la página de login.
    */
   const handleLogout = () => {
-    // TODO: Implementar con backend - limpiar tokens, etc.
     if (confirm('¿Estás seguro de cerrar sesión?')) {
-      router.push('/');
+      // Llamar a la función logout para limpiar localStorage
+      logout();
+      
+      // Redirigir a la página de autenticación
+      router.push('/auth');
     }
   };
 
+  // Envolver todo el contenido en ProtectedRoute para verificar autenticación
   return (
-    <div className="min-h-screen bg-slate-50 animate-page-enter">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-slate-50 animate-page-enter">
       {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 z-40 h-screen bg-slate-900 transition-all duration-300 ${
@@ -109,18 +135,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           })}
         </nav>
 
-        {/* Footer del sidebar */}
+        {/* Footer del sidebar con información del usuario */}
         {isSidebarOpen && (
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-800 space-y-3">
             <div className="flex items-center gap-3">
+              {/* Avatar con iniciales del usuario */}
               <div className="w-10 h-10 bg-[#1c6554] flex items-center justify-center text-white font-bold text-sm">
-                AD
+                {user?.name ? user.name.substring(0, 2).toUpperCase() : 'AD'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">Administrador</p>
-                <p className="text-xs text-slate-400 truncate">admin@newera.com</p>
+                <p className="text-sm font-medium text-white truncate">
+                  {user?.name || 'Administrador'}
+                </p>
+                <p className="text-xs text-slate-400 truncate">
+                  {user?.email || 'admin@newera.com'}
+                </p>
               </div>
             </div>
+            {/* Link para volver a la tienda */}
             <Link
               href="/"
               className="flex items-center justify-center gap-2 w-full py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
@@ -210,7 +242,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Page content */}
         <main className="p-8">{children}</main>
       </div>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }
 
